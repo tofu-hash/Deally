@@ -1,7 +1,6 @@
 # Deally
 
-Бот-миниигра. 
-
+Бот-миниигра для симуляции торговли криптовалютой.
 
 # Запуск
 
@@ -26,4 +25,11 @@ python3 run.py
 ```
 
 # Скриншоты
-Временно отсутствуют.
+
+![/start](source/screenshots/img_1.png)
+
+![/wallet](source/screenshots/img.png)
+
+![Market](source/screenshots/img_2.png)
+
+![Market](source/screenshots/img_3.png)

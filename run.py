@@ -3,6 +3,7 @@ from handlers.messages import *
 from handlers.init import *
 
 dp.register_message_handler(start_cmd_handler, commands=['start'], state='*')
+dp.register_message_handler(wallet_cmd_msg_handler, commands=['wallet'], state='*')
 dp.register_message_handler(help_cmd_handler, commands=['help'], state='*')
 dp.register_message_handler(get_sticker_id_handler, content_types=['sticker'], state='*')
 
@@ -21,13 +22,8 @@ dp.register_callback_query_handler(callback, state='*')
 async def set_default_commands(dp):
     await dp.bot.set_my_commands(
         [
-            BotCommand('task', 'Добавить задачу'),
-            BotCommand('last_task', 'Последняя задача'),
-            BotCommand('tasks', 'Просмотреть задачи'),
-            BotCommand('points', 'Статистика поинтов'),
-            BotCommand('all_tasks', 'Все ваши задачи за всё время'),
-            BotCommand('help', 'Помощь по командам бота'),
-            BotCommand('start', 'Перезапуск бота')
+            BotCommand('wallet', 'Открыть кошелёк'),
+            BotCommand('start', 'Перезапуск бота'),
         ]
     )
 

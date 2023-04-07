@@ -43,6 +43,25 @@ async def start_cmd_handler(msg: Message, state: FSMContext):
                      reply_markup=start_menu_reply_markup)
 
 
+async def wallet_cmd_msg_handler(msg: Message):
+    wallet_id, tokens, diamonds = execute(
+        ('SELECT id, tokens, diamonds '
+         'FROM wallets '
+         'WHERE user_id=%s') % msg.from_user.id,
+        fetchone=True
+    )
+    diamonds_word = morph.parse('алмаз')[0].make_agree_with_number(diamonds).word
+    tokens_word = morph.parse('токен')[0].make_agree_with_number(tokens).word
+
+    answer = ('👛 *Ваш кошелёк*\n\n'
+              '🌎 Адрес для перевода токенов: \n`%s`\n\n'
+              '🔘 *%s* %s\n\n'
+              '💠 *%s* %s') % \
+             (wallet_id, tokens, tokens_word, diamonds, diamonds_word)
+    await msg.answer(text=answer, parse_mode='markdown',
+                     reply_markup=start_menu_reply_markup)
+
+
 async def help_cmd_handler(msg: Message, state: FSMContext):
     await state.finish()
     await state.finish()
