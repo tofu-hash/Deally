@@ -19,10 +19,6 @@ async def start_cmd_handler(msg: Message, state: FSMContext):
          'VALUES ("%s", %s, %s);') %
         (key(), msg.from_user.id, now_unix_time())
     )
-    execute(
-        ('UPDATE wallets SET tokens=50, diamonds=50 '
-         'WHERE user_id=%s') % msg.from_user.id
-    )
 
     answer = (
         'Привет, *{}*!👋\n\n'
@@ -34,13 +30,18 @@ async def start_cmd_handler(msg: Message, state: FSMContext):
         'курсу и зарабатывай *токены*.\n\n'
         '🏆 Пользователи с наибольшим количеством '
         '*токенов* смогу попасть в *топ-10.*\n\n'
-        '📖 *Комиссии и пополнения:*\n'
-        '• Каждую неделю тебе даётся 50 токенов\n'
-        '• За каждую сделку мы забираем 5% от суммы'
     ).format(msg.from_user.first_name)
 
-    await msg.answer(text=answer, parse_mode='markdown',
-                     reply_markup=start_menu_reply_markup)
+    if msg.get_args():
+        callback_data = msg.get_args().split('callbackData')[1]
+        reply_markup = InlineKeyboardMarkup()
+        reply_markup.add(InlineKeyboardButton(text='• Открыть •',
+                                              callback_data=callback_data))
+        await msg.answer(text='⛓ *Ссылка на функционал*', parse_mode='markdown',
+                         reply_markup=reply_markup)
+    else:
+        await msg.answer(text=answer, parse_mode='markdown',
+                         reply_markup=start_menu_reply_markup)
 
 
 async def wallet_cmd_msg_handler(msg: Message):
@@ -74,3 +75,12 @@ async def help_cmd_handler(msg: Message, state: FSMContext):
 async def get_sticker_id_handler(msg: Message):
     await msg.answer_sticker(sticker=msg.sticker.file_id)
     print(msg.sticker.file_id)
+
+
+async def send_tokens_select_wallet_handler(msg: Message, state: FSMContext):
+    await state.update_data(data={'wallet': msg.text})
+
+    answer = '🔘 *Укажи количество токенов для отправки*'
+    await msg.answer(text=answer, parse_mode='markdown',
+                     reply_markup=select_tokens_count_reply_markup)
+    await WalletStatesGroup.select_tokens_count.set()

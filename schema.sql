@@ -34,6 +34,7 @@ CREATE TABLE IF NOT EXISTS sells (
     amount INTEGER,
     now_rate INTEGER,
     user_id INTEGER,
+    completed INTEGER DEFAULT 0,
     created INTEGER
 );
 

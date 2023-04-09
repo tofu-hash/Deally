@@ -37,5 +37,5 @@ make_tables_schema()
 
 execute(
     ('INSERT INTO rates (user_id, now_rate, created) '
-     'VALUES (1, 50, 1);')
+     'VALUES (1, 150, 1);')
 )
