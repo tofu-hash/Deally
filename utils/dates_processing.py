@@ -7,7 +7,7 @@ months = {
 }
 
 
-def format_hour_to_timestamp(hour: int, timestamp: int = 2):
+def format_hour_to_timestamp(hour: int, timestamp: int = 0):
     __hour = hour + timestamp
     if hour in [22, 23, 24]:
         __hour = (hour - 24) + timestamp

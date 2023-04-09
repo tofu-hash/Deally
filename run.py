@@ -5,6 +5,7 @@ from handlers.init import *
 dp.register_message_handler(start_cmd_handler, commands=['start'], state='*')
 dp.register_message_handler(start_cmd_handler, commands=['wallet'], state='*')
 dp.register_message_handler(help_cmd_handler, commands=['help'], state='*')
+dp.register_message_handler(top_cmd_handler, commands=['top'], state='*')
 dp.register_message_handler(get_sticker_id_handler, content_types=['sticker'], state='*')
 
 # == WALLET ==
@@ -51,6 +52,7 @@ async def set_default_commands(dp):
     await dp.bot.set_my_commands(
         [
             BotCommand('wallet', 'Открыть кошелёк'),
+            BotCommand('top', 'Топ игроков'),
             BotCommand('start', 'Перезапуск бота'),
         ]
     )

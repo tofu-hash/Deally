@@ -84,3 +84,20 @@ async def send_tokens_select_wallet_handler(msg: Message, state: FSMContext):
     await msg.answer(text=answer, parse_mode='markdown',
                      reply_markup=select_tokens_count_reply_markup)
     await WalletStatesGroup.select_tokens_count.set()
+
+
+async def top_cmd_handler(msg: Message):
+    top_wallets = execute(
+        ('SELECT id, tokens, diamonds '
+         'FROM wallets ORDER BY tokens'),
+        fetchall=True
+    )[::-1]
+    answer = '📊 Топ-10 кошельков на сегодня\n\n'
+
+    for num, wallet in enumerate(top_wallets, start=1):
+        if num == 1:
+            num = '1 🏆'
+        answer += '%s. `%s`\n' \
+                  '├ 🎯 *%s токенов*\n' \
+                  '└ 💠 *%s алмазов*\n\n' % (num, wallet[0], wallet[1], wallet[2])
+    await msg.answer(text=answer, parse_mode='markdown')

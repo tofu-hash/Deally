@@ -362,7 +362,7 @@ async def buy_tokens_handler(msg: CallbackQuery, state: FSMContext):
               '👛 Кошелёк владельца:\n'
               '`%s`') % \
              (sell[0], sell[1], tokens_word,
-              sell[2], diamonds_word,
+              sell[2] * sell[1], diamonds_word,
               get_datetime(sell[4]), sell_owner_wallet)
     await msg.message.edit_text(text=answer, parse_mode='markdown',
                                 reply_markup=buy_tokens_reply_markup)
@@ -384,53 +384,58 @@ async def confirm_buy_handler(msg: CallbackQuery, state: FSMContext):
          'WHERE user_id=%s') % sell_owner_id,
         fetchone=True
     )[0]
-    current_user_wallet = execute(
-        ('SELECT id FROM wallets '
+    current_user_wallet, current_user_diamonds_count = execute(
+        ('SELECT id, tokens FROM wallets '
          'WHERE user_id=%s') % msg.from_user.id,
         fetchone=True
-    )[0]
-    execute(
-        ('UPDATE sells SET completed=1 '
-         'WHERE id=%s') % sell_id
     )
+    if current_user_diamonds_count >= int(tokens_count * sell_rate):
+        execute(
+            ('UPDATE sells SET completed=1 '
+             'WHERE id=%s') % sell_id
+        )
 
-    diamonds_count = tokens_count * sell_rate
+        diamonds_count = tokens_count * sell_rate
 
-    diamonds_word = morph.parse('алмаз')[0].make_agree_with_number(diamonds_count).word
-    tokens_word = morph.parse('токен')[0].make_agree_with_number(tokens_count).word
+        diamonds_word = morph.parse('алмаз')[0].make_agree_with_number(diamonds_count).word
+        tokens_word = morph.parse('токен')[0].make_agree_with_number(tokens_count).word
 
-    execute(
-        ('UPDATE wallets SET tokens=tokens+%s, diamonds=diamonds-%s '
-         'WHERE user_id=%s') % (tokens_count, diamonds_count, msg.from_user.id)
-    )
-    execute(
-        ('UPDATE wallets SET diamonds=diamonds+%s '
-         'WHERE user_id=%s') % (diamonds_count, sell_owner_id)
-    )
+        execute(
+            ('UPDATE wallets SET tokens=tokens+%s, diamonds=diamonds-%s '
+             'WHERE user_id=%s') % (tokens_count, diamonds_count, msg.from_user.id)
+        )
+        execute(
+            ('UPDATE wallets SET diamonds=diamonds+%s '
+             'WHERE user_id=%s') % (diamonds_count, sell_owner_id)
+        )
 
-    current_user_answer = ('✅ *Сделка *#%s* завершена*\n\n'
-                           '🔘 *+ %s %s*\n'
-                           '💠 *- %s %s*\n\n'
-                           '👛 Кошелёк продавца:\n'
-                           '`%s`\n\n'
-                           '📅 *%s*') % \
-                          (sell_id, tokens_count, tokens_word,
-                           diamonds_count, diamonds_word,
-                           sell_owner_wallet, get_datetime(created))
+        current_user_answer = ('✅ *Сделка *#%s* завершена*\n\n'
+                               '🔘 *+ %s %s*\n'
+                               '💠 *- %s %s*\n\n'
+                               '👛 Кошелёк продавца:\n'
+                               '`%s`\n\n'
+                               '📅 *%s*') % \
+                              (sell_id, tokens_count, tokens_word,
+                               diamonds_count, diamonds_word,
+                               sell_owner_wallet, get_datetime(created))
 
-    sell_owner_answer = ('✅ *Сделка *#%s* завершена*\n\n'
-                         '🔘 *- %s %s*\n'
-                         '💠 *+ %s %s*\n\n'
-                         '👛 Кошелёк покупателя:\n'
-                         '`%s`\n\n'
-                         '📅 *%s*') % \
-                        (sell_id, tokens_count, tokens_word,
-                         diamonds_count, diamonds_word,
-                         current_user_wallet, get_datetime(created))
+        sell_owner_answer = ('✅ *Сделка *#%s* завершена*\n\n'
+                             '🔘 *- %s %s*\n'
+                             '💠 *+ %s %s*\n\n'
+                             '👛 Кошелёк покупателя:\n'
+                             '`%s`\n\n'
+                             '📅 *%s*') % \
+                            (sell_id, tokens_count, tokens_word,
+                             diamonds_count, diamonds_word,
+                             current_user_wallet, get_datetime(created))
 
-    await msg.message.edit_text(text=current_user_answer, parse_mode='markdown',
-                                reply_markup=start_menu_reply_markup)
-    await bot.send_message(chat_id=sell_owner_id, text=sell_owner_answer, parse_mode='markdown')
+        await msg.message.edit_text(text=current_user_answer, parse_mode='markdown',
+                                    reply_markup=start_menu_reply_markup)
+        await bot.send_message(chat_id=sell_owner_id, text=sell_owner_answer, parse_mode='markdown')
+
+    else:
+        await msg.message.edit_text(text='🎯 Недостаточно алмазов',
+                                    reply_markup=start_menu_reply_markup)
     await state.finish()
 
 
